@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>k8快速运行nginx | 大帅哥的博客哟</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://frankpig.github.io/favicon.ico?v=1665729828644">
+<link rel="stylesheet" href="https://frankpig.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+为了方便配置，创建三个文件。
+
+
+如果单纯为了快速部署，configmap可以不要。
+
+
+
+
+nginx-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  ..." />
+    <meta name="keywords" content="kind,kubernetes" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://frankpig.github.io">
+        <img src="https://frankpig.github.io/images/avatar.png?v=1665729828644" class="site-logo">
+        <h1 class="site-title">大帅哥的博客哟</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://frankpig.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">k8快速运行nginx</h2>
+            <div class="post-date">2022-10-14</div>
+            
+            <div class="post-content" v-pre>
+              <ul>
+<li>为了方便配置，创建三个文件。
+<ol>
+<li><img src="https://frankpig.github.io/post-images/1665726986727.png" alt="" loading="lazy"></li>
+<li>如果单纯为了快速部署，configmap可以不要。</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>nginx-deployment.yaml</li>
+</ol>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx 
+    spec:
+      containers:
+      - name: nginx 
+        image: nginx 
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+            items:
+            - key: nginx.conf
+              path: nginx.conf
+
+</code></pre>
+<ol start="2">
+<li>nginx-service.yaml</li>
+</ol>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 88
+    targetPort: 80
+  selector:
+    app: nginx
+  type: NodePort
+</code></pre>
+<ol start="3">
+<li>nginx-configmap.yaml</li>
+</ol>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nginx-config
+data:
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+
+
+    events {
+        worker_connections  1024;
+    }
+
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '
+                          '$status $body_bytes_sent &quot;$http_referer&quot; '
+                          '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+
+        include /etc/nginx/conf.d/*.conf;
+    }
+
+</code></pre>
+<ul>
+<li>
+<p>创建完文件之后，执行以下命令</p>
+<ul>
+<li><code>kubectl apply -f nginx-deployment.yaml</code></li>
+<li><code>kubectl apply -f nginx-configmap.yaml</code></li>
+<li><code>kubectl apply -f nginx-service.yaml</code></li>
+</ul>
+</li>
+<li>
+<p>查看运行状态</p>
+<ul>
+<li><img src="https://frankpig.github.io/post-images/1665727974370.png" alt="" loading="lazy"></li>
+<li><img src="https://frankpig.github.io/post-images/1665728041940.png" alt="" loading="lazy"></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://frankpig.github.io/tag/Y-hzPVtB-/" class="tag">
+                    kind
+                  </a>
+                
+                  <a href="https://frankpig.github.io/tag/rRiUBk8Sk9/" class="tag">
+                    kubernetes
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://frankpig.github.io/post/kind-jian-yi-shi-yong-zhi-nan/">
+                  <h3 class="post-title">
+                    kind简易使用指南
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

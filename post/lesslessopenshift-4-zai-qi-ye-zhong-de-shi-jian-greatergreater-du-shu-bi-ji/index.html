@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>《openshift 4 在企业中的实践》读书笔记 | 大帅哥的博客哟</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://frankpig.github.io/favicon.ico?v=1665729828644">
+<link rel="stylesheet" href="https://frankpig.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+ocp4的基础架构和运维
+
+[TOC]
+红帽与Docker
+红帽开发CRI-O，Docker开发Containerd。
+调用关系
+从概念上，从PaaS顶层到底层的调用关系是：
+Orchestration API →\rightarrow→..." />
+    <meta name="keywords" content="openshift" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://frankpig.github.io">
+        <img src="https://frankpig.github.io/images/avatar.png?v=1665729828644" class="site-logo">
+        <h1 class="site-title">大帅哥的博客哟</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://frankpig.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">《openshift 4 在企业中的实践》读书笔记</h2>
+            <div class="post-date">2022-09-16</div>
+            
+            <div class="post-content" v-pre>
+              <!-- more -->
+<p>ocp4的基础架构和运维</p>
+<!-- more -->
+<p>[TOC]</p>
+<h1 id="红帽与docker">红帽与Docker</h1>
+<p>红帽开发CRI-O，Docker开发Containerd。</p>
+<h1 id="调用关系">调用关系</h1>
+<p>从概念上，从PaaS顶层到底层的调用关系是：<br>
+Orchestration API <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Container Engine API <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Kernel API</p>
+<h1 id="ocp3的调用架构">ocp3的调用架构：</h1>
+<p>Kubernetes Master <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Kubelet <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Docker Engine <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Containerd <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> runC <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Linux Kernel</p>
+<h1 id="ocp4的调用架构">ocp4的调用架构：</h1>
+<p>Kubernetes Master <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Kubelet <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> CRI-O <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> runC <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">→</span></span></span></span> Linux Kernel</p>
+<ul>
+<li>CRI-O的运行不依赖于守护进程，即使ocp节点上的CRI-O的Systemd进程终止，所有在此节点上运行的pod也不受影响。</li>
+</ul>
+<h1 id="coreos">coreOS</h1>
+<p>CoreOS系统，rpm-ostree 文件系统布局如下：</p>
+<ol>
+<li>/usr 是操作系统二进制文件和库的存储位置，只读。</li>
+<li>/etc, /boot, /var在系统上可写，只能通过machine config operator更改。</li>
+<li>/var/lib/containers 适用于存储容器镜像的graph存储位置。</li>
+</ol>
+<ul>
+<li>新的coreos部署在升级过程中进行，并在下次重启时生效；如果升级出现问题，则进行一次回滚并重启。升级在ocp集群更新期间执行，不能单独升级coreos。</li>
+</ul>
+<h1 id="operator">Operator</h1>
+<h2 id="cluster-operator">Cluster Operator</h2>
+<ul>
+<li>每个co相关的namespace通常有两个，一个负责运行openrator本身的pod，另一个负责运行由这个operator控制的、负责具体工作的pod。</li>
+<li>e.g. dns通过Operator的启动和控制流程为：<br>
+i. dns Cluster Operator创建dns-default Daemonset<br>
+ii. dns-default Daemonset在每个ocp节点创建coredns pod，负责集群中的dns解析<br>
+iii. 通过配置dns cluster operator的参数来改变coredns的行为</li>
+</ul>
+<h2 id="application-operator">Application Operator</h2>
+<ul>
+<li>在operatorHub里面发布的operator</li>
+<li>operator framework<br>
+i. operator sdk<br>
+ii. operator metering：为提供专业服务的operator启用使用情况报告<br>
+iii. operator lifecycle manager：提供了一种陈述式的方式来安装、管理和升级operator以及operator在集群中所依赖的资源。</li>
+</ul>
+<h1 id="ocp核心进程简介">ocp核心进程简介</h1>
+<h2 id="master">Master</h2>
+<ul>
+<li>kube-apiserver<br>
+i. 验证并配置api对象的数据<br>
+ii. 提供rest操作服务<br>
+iii. 为集群的共享状态提供前端访问</li>
+<li>etcd<br>
+i. 存放kube-apiserver的相关数据</li>
+<li>controller manager<br>
+i. 只在master运行<br>
+ii. 监控对象包括node, workload, namespace, service account</li>
+<li>scheduler</li>
+</ul>
+<h2 id="node">Node</h2>
+<ul>
+<li>kubelet<br>
+i. node上运行的node agent<br>
+ii. 可以通过hostname将node注册到kube-apiserver</li>
+<li>kube-proxy<br>
+i. 实现kubernetes service的通信与负载均衡机制的重要组件<br>
+ii. 负责为pod创建代理服务<br>
+iii. 从kube-apiserver获取所有service信息，并根据service信息创建代理服务，实现service到pod的请求路由和转发</li>
+<li>容器运行时</li>
+</ul>
+<h1 id="ocp核心进程分析">ocp核心进程分析</h1>
+<h2 id="master-2">Master</h2>
+<ul>
+<li>进程的运行方式<br>
+i. 普通pod（cluster operator管理）<br>
+ii. 静态pod<br>
+iii. systemd服务<br>
+b. 静态pod不需要连接到api server即可启动，由特定节点上的kubelet守护程序直接管理<br>
+i. 登录master，切换到/etc/kubernetes/static-pod-resources/<br>
+ii. ls看到etcd, kube-controller-manager, kube-apiserver, kube-scheduler<br>
+iii. 以上pod在ocp安装完成前，在bootstrap阶段已经启动<br>
+c. systemd服务<br>
+i. kubelet<br>
+ii. crio<br>
+d. 普通pod<br>
+i. vsphere-csi-controller<br>
+ii. csi-snapshot-controller<br>
+iii. machine-config-controller<br>
+iv. multus-admission-controller<br>
+v. sdn-controller<br>
+2. Node<br>
+a. kube-proxy<br>
+i. 安装方式取决于集群配置的sdn插件<br>
+ii. 可以通过network operator的参数来配置kube-proxy<br>
+1) oc edit networks.operator.openshift.io<br>
+iii. 配置参数<br>
+1) iptablesSyncPeriod：iptables规则的刷新时间间隔<br>
+2) bindAddress：kube-proxy绑定的地址<br>
+3) proxyArguments：传递给kube-proxy额外的命令行参数<br>
+iv. iptables的同步触发条件：<br>
+1) events触发：是指service或endpoint对象发生变化<br>
+2) 超过kube-proxy设定的同步时间<br>
+ocp的认证与授权
+<ol>
+<li>认证<br>
+a. 认证方式<br>
+i. oauth access token<br>
+1) 可以通过用户登录、serviceaccount或者api获取<br>
+ii. x509 client certificate<br>
+1) 用于集群组件向api server认证<br>
+b. user<br>
+i. ocp中与api server进行交互的实体<br>
+ii. 分为system user/ regular user/ service account<br>
+c. identity<br>
+i. 在使用identity providers中的用户登录后，会自动在ocp中创建user对象和identity对象，identity对象中记录user和identity providers的信息，实现唯一标识一个用户。<br>
+d. 过程<br>
+i. user尝试向api server进行身份验证<br>
+ii. oauth server通过identity providers验证请求者的身份<br>
+iii. 通过验证后，oauth server向用户提供oauth access token</li>
+<li>授权<br>
+a. group<br>
+b. role<br>
+i. cluster role<br>
+ii. local role</li>
+</ol>
+</li>
+</ul>
+<h1 id="ocp的scc安全上下文约束">ocp的scc（安全上下文约束）</h1>
+<pre><code>1. 运行特权容器
+2. 在容器中获取额外的能力
+3. 使用宿主机目录作为pod volume
+4. 容器的selinux上下文
+5. 容器的uid
+6. 宿主机命名空间和网络的使用
+7. pod volume的属组fsGroup
+8. 附加组的配置
+9. 根文件系统只读
+10. 可以使用的volume类型
+11. 配置允许的seccomp策略
+
+scc通过setting和strategy两部分来控制pod的权限，这些配置的值分为以下三类：
+1. 通过布尔值设置，只有True/False
+2. 通过以组允许的值设置，比如Allow Volume Types
+3. 通过策略控制
+	a. run as user
+		i. 控制pod启动后运行进程的用户
+	b. selinux context
+		i. 控制pod启动后的selinux标签
+	c. supplemental groups
+		i. 控制pod运行用户的附加组
+	d. fsgroup
+</code></pre>
+<p>优先级顺序：pod定义&gt; scc策略 &gt; project annotations默认值</p>
+<p>SCC匹配<br>
+1. 过滤<br>
+a. pod有权限使用scc列表<br>
+2. 匹配<br>
+a. 逐个匹配pod的需求与各项策略的定义。<br>
+b. 如果有多个scc满足，则需要评估scc的优先级。<br>
+c. 优先级相同，则选择策略限制更加严格的scc。</p>
+<p>ocp中pod调度策略<br>
+默认调度策略<br>
+1. predicates<br>
+a. static 静态<br>
+i. 不接受用户的任何配置参数或输入<br>
+b. general 普通<br>
+i. non-critical predicates——针对非关键pod<br>
+ii. essential predicates——针对所有pod<br>
+2. priorities<br>
+a. static 静态<br>
+i. 除权重外不接受用户的任何配置参数。<br>
+ii. 必须要指定权重。<br>
+b. configurable 可配置</p>
+<p>高级调度策略<br>
+1. node selectors<br>
+2. affinity/anti-affinity<br>
+3. taints/tolerations</p>
+<p>pod调度程序算法<br>
+1. 过滤节点<br>
+a. pod定义资源请求<br>
+b. 评估节点列表是否有污点<br>
+2. 对节点候选短列表排优先级<br>
+a. 算出候选列表中各个节点的加权得分<br>
+3. 选择最适合的节点</p>
+<p>ocp的网络介绍与规划<br>
+ocp内部通信网络整体概述<br>
+1. ocp中pod之间的通信是否一定需要service？<br>
+a. 不，可以直接在pod里面curl其他pod的ip:port<br>
+2. 从一个pod访问另外一个pod，pod之间可以通信，其数据链路是什么？<br>
+a. 两个pod如果在一个节点上，其通信流量没有绕出本宿主机的ovs<br>
+b. 如果两个pod在不同节点上，pod之间的通信经过了vxlan<br>
+3. 既然pod之间通信不需要service，为何k8s引入service？<br>
+a. 负载均衡：service提供其所属多个pod的负载均衡。<br>
+b. 服务注册与发现：解决不同服务之间的通信问题。<br>
+i. 每创建一个service，就会分配一个ip，称为clusterIp，这样内部nds就可以通过service名称（FQDN）解析成clusterIp地址，这样就完成了服务注册，dns解析需要的信息全部保存在etcd中。<br>
+ii. etcd中记录的service注册信息有namespace、service name、clusterIp，这三个信息可以组成dns A记录（通过查询生成）<br>
+4. 有了service之后，pod之间的通信和没有service有何区别？<br>
+a. 在数据通信层，没区别，因为service只是逻辑层面的东西。<br>
+b. 但是没有service，无法实现负载均衡，需要第三方实现。<br>
+5. clusterIp到pod IP这部分的负载均衡是如何实现的？<br>
+a. kube-proxy（iptables模式）</p>
+<p>ocp的网络模型<br>
+1. pod内部容器通信的网络<br>
+a. k8通过为pod分配统一的网络空间，实现了多个容器之间的网络共享，也就是同一个pod中的容器之间通过localhost相互通信。<br>
+2. pod与pod通信的网络<br>
+a. cni规范<br>
+b. 基于二层实现<br>
+i. 通过将pod放在一个大二层网络中，跨节点通信通常使用vxlan或udp封包实现，常用的此类插件有flannel、ovs等。<br>
+c. 基于三层实现<br>
+i. 将pod放在一个互联互通的网络中，通常使用路由实现，常用的此类插件有calico、flannel-gw等。<br>
+d. ocp默认使用的是基于ovs的二层网络。<br>
+3. pod和service通信的网络<br>
+a. 既然pod之间通信不需要service，为何k8s引入service？<br>
+b. k8提供了三种负载均衡方式：userspace，iptables, ipvs<br>
+c. ocp默认使用iptables，有两个缺点<br>
+i. 不支持复杂的负载均衡算法<br>
+ii. 当选择的某个后端pod没有响应时无法自动重新连接到另一个pod，需要利用pod的健康检查来确保endpoints列表中的pod都是存活的<br>
+4. 集群外部与service或pod通信的网络<br>
+a. hostport<br>
+b. nodeport<br>
+c. hostNetwork<br>
+d. loadBalancer<br>
+e. ingress/router</p>
+<p>ocp pod网络的实现<br>
+openshift SDN<br>
+• ocp中pod网络默认用ocp sdn实现和维护<br>
+• 底层是使用OpenvSwitch实现的二层覆盖网络，跨节点通信使用Vxlan封包<br>
+• 提供三种模式<br>
+○ subnet：提供扁平的pod网络。<br>
+§ 集群中每个pod都可以与其他pod（本项目或其他项目）进行通信<br>
+○ multitenant：提供项目级别的隔离。<br>
+§ 除default项目外，默认所有项目之间隔离。<br>
+§ 每个项目会收到唯一的虚拟网络id（vnid），用于标识分配给项目的pod流量。<br>
+§ 不同vnid项目中的pod之间无法互相通信，除了vnid为0的项目default。<br>
+○ networkpolicy：ocp默认的ovs插件模式，提供pod粒度级别的隔离<br>
+§ 模式的隔离完全由networkpolicy对象控制，项目管理员可以创建网络策略。<br>
+§ 支持按namespace/pod级别进行网络访问控制。<br>
+§ ocp sdn默认使用了networkpolicy模式，初始情况下，所有项目中没有任何的networkpolicy对象。<br>
+§ 底层使用iptables，所以策略不宜作用域大量独立pod<br>
+• pod访问外部网络，通过snat，最终以pod所在的worker节点ip访问外部网络。<br>
+• 实现pod访问外部网络的控制，主要有两种方式<br>
+○ 配置namespace级别的egress ip<br>
+§ 通过为namespace指定egress ip，并将egress ip分配到指定的节点实现；支持自动/手动配置。<br>
+○ 配置egress防火墙<br>
+§ 在集群中创建EgressNetworkPolicy对象。<br>
+§ 每个项目中只能定义一个EgressNetworkPolicy对象。<br>
+§ 支持multitenant/networkpolicy<br>
+• 通过multus-cni可以实现pod多网络平面，让一个pod同时配置多个网卡连接到多个网络。</p>
+<p>ocp中dns的实现<br>
+• ocp使用coreDNS，提供ocp内部的域名解析服务。<br>
+• coreDNS会监听k8 api，当新创建一个service时，coreDNS中就会提供<service-name>.<project-name>.svc.cluster.local域名的解析；还可以通过<service-name>.<project-name>.endpoints.cluster.local解析endpoints<br>
+○ 来自同一项目的pod可以直接使用service作为短域名<br>
+○ 来自不同项目的pod可以使用service名称和项目名称作为短域名<br>
+• 每个节点会启动一个coreDNS容器，在kubelet将--cluster-dns设定为coreDNS的service clusterIP，这样pod就可以使用coreDNS进行域名解析。<br>
+• cluster domain定义了集群中pod和service域名的基本dns域，默认为cluster.local<br>
+• dns解析过程<br>
+a. 宿主机上应用的dns解析直接通过宿主机上/etc/resolv.conf中配置的上游dns服务器解析；同时这也表明在宿主机上默认无法解析k8s的service域名<br>
+b. pod中的应用直接通过pod中配置的dns server解析所有域名，该域名会将解析查询分配到具体的coreDNS实例中。<br>
+c. 在coreDNS实例中，如果有cache缓存，则直接返回；如果没有cache，则判断，若解析域名属于cluster.local, in-addr.arpa或ip6.arpa， 则通过coreDNS的k8插件去查询，本质上是通过k8 api查询etcd中保存的数据实现域名解析ip地址的返回，否则转到宿主机/etc/resolv.conf中配置的上游dns服务器。</p>
+<p>ocp上ocn-kubernetes的实现<br>
+• 整体上看，ovn在实现overlay, service, NAT方面，效率和性能高于sdn<br>
+• ovn模式中，ocp将不再需要kube-proxy，因此也就不再需要iptables实现。</p>
+<p>ocp外部访问的实现<br>
+• hostport<br>
+○ 在宿主机上运行的容器，为了外部能够访问这个容器，将容器的端口与宿主机进行端口映射。<br>
+○ 优点是易操作。<br>
+○ 缺点是无法支持复杂业务场景，并且容器间的相互访问比较困难。<br>
+• nodeport<br>
+○ 是service的一种类型。<br>
+○ 本质上是通过在集群的每个节点上暴露一个端口，然后将这个端口映射到service的端口。<br>
+○ nodeport和hostport最重要的区别是hostport是针对一个单一宿主机的一个容器，而nodeport是针对k8集群而言的。<br>
+○ 缺点很明显，宿主机端口浪费和安全隐患，并且数据转发次数较多。<br>
+• hostnetwork<br>
+○ hostnetwork是pod运行的一种模式。<br>
+○ pod的ip和端口会直接绑定到宿主机的ip和端口。<br>
+○ 在数据中心的ocp，router就是以hostnetwork模式运行的（公有云环境中router通过loadbalancer类型service对外暴露）<br>
+○ 相比于nodeport，优势在于可以直接使用宿主机网络，转发路径短，性能好。<br>
+○ 缺点是占用节点的实际端口，无法在一个节点同时运行相同端口的两个pod。<br>
+• loadBalancer<br>
+○ 也是service的一种类型，用于和云平台负载均衡器结合。<br>
+○ 实际上是通过向底层云平台申请创建一个负载均衡器来向外暴露服务。<br>
+• ingress/router<br>
+○ 本质上ingress就是用于配置域名转发，并实时监控应用pod的变化，动态的更新负载均衡的配置文件。<br>
+○ ingress包含两大组件，ingress controller和ingress。<br>
+§ ingress是一种资源对象，声明域名和service对应的问题。<br>
+§ ingress controller是负载均衡器，加载ingress动态生成负载均衡配置。<br>
+○ ocp默认的router本质上是一个以hostnetwork方式运行在节点上的容器化HAproxy，可提供http、https、websockets、tls with sni协议的访问。<br>
+§ router相当于ingress controller<br>
+§ route相当于ingress对象<br>
+§ ocp中可以同时使用router或ingress对象对外暴露服务。<br>
+• 外部访问方式使用建议<br>
+○ 对于http、https类的七层应用，往往通过router暴露fqdn的方式访问。<br>
+○ 对于非http、https类的四层应用（如mysql），存在两种情况：<br>
+§ 单个节点运行一个副本：hostnetwork（转发路径短，性能更好）<br>
+§ 单个节点运行多个副本：nodeport</p>
+<p>ocp四层ingress实现<br>
+1. 如果ingress大多数是七层，采用默认的router即可。<br>
+2. 如果有少量的四层ingress需求，采用默认的HAproxy+nodeport。<br>
+3. HAproxy默认支持七层，如果要支持四层，需要定制模板。<br>
+4. ocp上的nginx ingress operator（loadBalancer模式）可以实现四层ingress，但前端需要能够提供loadBalancer service ip的硬件负载均衡器。此外，还需要通过全局的（nginx-ingress命名空间）configmap实现，还需要手工写要暴露的应用的service全名。<br>
+5. 如果ocp部署在裸机上，又不想引入f5，可以使用MetalLB为nginx ingress controller提供ip。</p>
+<p>ocp的存储介绍与规划<br>
+pv和pvc<br>
+• pv是一个开放的存储管理框架。<br>
+○ ocp支持nfs, glusterFS, cinder, ceph, EBS, iSCSI, fibre channel<br>
+• pvc是用户的一个volume请求。<br>
+• pv只有被pvc绑定后才能被pod挂载使用。<br>
+• pv和pvc绑定的生命周期<br>
+○ available<br>
+§ pv创建完成，处于可用状态。<br>
+○ pending<br>
+§ pv和pvc处于匹配状态。<br>
+§ 匹配策略有访问模式和卷大小以及label匹配。<br>
+§ 如果无法匹配，则pvc会一直处于pending状态。<br>
+○ bound<br>
+§ pv和pvc已经绑定，这个状态的pvc才能被pod挂载使用。<br>
+○ released<br>
+§ 挂载pvc的pod被删除，pvc处于释放状态。<br>
+○ failure<br>
+§ 删除pvc，pv转变为回收状态，该状态下的pv无法直接被新的pvc绑定。<br>
+§ 回收状态下pv是否保留数据取决于pv的回收策略定义，默认会保留。<br>
+§ 如果想要将该状态的pv转变为available，必须删除pv然后重新创建。<br>
+• pv有三种访问模式<br>
+a. readWriteOnce<br>
+§ pv可以由单个pod以读写方式挂载<br>
+b. readOnlyMany<br>
+§ pv可以由多个pod以只读方式挂载<br>
+c. readWriteMany<br>
+§ pv可以由多个pod以读写方式挂载<br>
+• 动态pv优先，如果动态pv无法满足pvc需求，才会匹配静态pv。</p>
+<p>ocp存储容量规划<br>
+• etcd<br>
+○ 保存在master节点的本地磁盘，默认在/var/lib/etcd<br>
+○ 20GB以上<br>
+• docker/cri-o本地存储<br>
+○ 100GB以上<br>
+• ocp节点本地日志存储<br>
+○ 默认存放在/var/log<br>
+○ 15GB以上<br>
+• 镜像仓库<br>
+○ 推荐对象存储&gt;文件系统存储&gt;块存储<br>
+• 日志系统<br>
+○ 推荐块存储&gt;文件系统存储<br>
+• 监控系统<br>
+○ 推荐块存储&gt;文件系统存储</p>
+<p>ocp高可用<br>
+1. 控制节点<br>
+a. 存储层<br>
+§ 采用raft<br>
+§ follower, candidate, leader<br>
+§ follower在一段时间内没有收到来自leader的心跳，就会转变为candidate<br>
+b. 管理层<br>
+§ controller-manager服务<br>
+§ 同一时刻只允许多个节点的一个服务处理任务（一主多从）<br>
+§ 利用etcd强一致性实现选举<br>
+§ 节点初始化时，controller-manager会向etcd注册leader<br>
+c. 接入层<br>
+§ apiserver服务<br>
+§ apiserver本身无状态，可以实现多活。<br>
+§ 通常采用在apiserver前端加负载均衡实现。<br>
+d. 如果故障节点大于一半以上，集群就会进入只读模式。<br>
+2. router<br>
+a. 建议使用hostnetwork<br>
+b. 在多个节点上运行多个router<br>
+c. 前端通过软件/硬件负载均衡到多个router<br>
+3. 镜像仓库<br>
+a. 默认都是使用docker-distribution，属于无状态应用。<br>
+4. 管理控制台<br>
+a. 指的是console ui界面<br>
+b. 启动多个容器（因为是无状态应用）</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://frankpig.github.io/tag/KP7stFjfe/" class="tag">
+                    openshift
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>
